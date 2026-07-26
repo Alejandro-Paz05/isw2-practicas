@@ -35,3 +35,16 @@ struct Pedido {                // Smell: Lista larga de parametros = agrupados e
     bool esVip;
 };
 
+double calcularDescuento(bool esVip) {   //  Smell 3: Codigo duplicado 
+    return esVip ? DESCUENTO_VIP : DESCUENTO_REGULAR;
+}
+
+double calcularTotal(const Pedido& p) { 
+    if (p.cantidad <= 0) return 0;
+    return p.precio * p.cantidad * calcularDescuento(p.esVip);
+}
+
+void imprimirPago(const Pedido& p, double total) { // 
+    cout << p.cliente << " pagó: " << total << endl;
+}
+
