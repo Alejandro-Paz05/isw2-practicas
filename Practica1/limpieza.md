@@ -28,3 +28,10 @@ using namespace std;
 const double DESCUENTO_VIP = 0.85;         //Smell: Numeros magicos = constante con nombre
 const double DESCUENTO_REGULAR = 0.15;
 
+struct Pedido {                // Smell: Lista larga de parametros = agrupados en struct
+    string cliente;
+    double precio;
+    int cantidad;
+    bool esVip;
+};
+
