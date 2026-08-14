@@ -17,15 +17,45 @@
   'use strict';
 
   // Rango horario laboral
+  const HORA_INICIO = 8;   // 08:00
+  const HORA_FIN = 18;     // 18:00 (exclusivo)
+
+  /**
+   * Crea un nuevo gestor de citas.
+   */
   function crearGestor() {
+    const citas = [];
+    let siguienteId = 1;
+
     return {
-      agendar: function () {
-        // TODO: implementar
-        throw new Error('No implementado');
-      },
-      cancelar: function () {},
-      listar: function () { return []; }
+      agendar,
+      listar,
+      _getCitas: () => citas
     };
+
+    /**
+     * RF-1: Agenda una cita médica.
+     * @returns {object} La cita creada.
+     */
+    function agendar({ paciente, doctor, fecha, hora }) {
+      const cita = {
+        id: siguienteId++,
+        paciente,
+        doctor,
+        fecha,
+        hora,
+        cancelada: false
+      };
+      citas.push(cita);
+      return cita;
+    }
+
+    /**
+     * RF-5: Lista las citas activas.
+     */
+    function listar() {
+      return citas.filter(function (c) { return !c.cancelada; });
+    }
   }
 
   function esHorarioLaboral() {
