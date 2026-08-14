@@ -36,11 +36,15 @@
     /**
      * RF-1: Agenda una cita médica.
      * RF-2: Valida horario laboral (08:00 - 18:00).
+     * RF-3: Evita citas duplicadas (mismo doctor, fecha y hora).
      * @returns {object} La cita creada.
      */
     function agendar({ paciente, doctor, fecha, hora }) {
       if (!esHorarioLaboral(hora)) {
         throw new Error('Fuera del horario laboral (08:00 - 18:00)');
+      }
+      if (estaDuplicada(doctor, fecha, hora)) {
+        throw new Error('Ya existe una cita con este doctor en esa fecha y hora');
       }
       const cita = {
         id: siguienteId++,
@@ -52,6 +56,14 @@
       };
       citas.push(cita);
       return cita;
+    }
+
+    // Verifica si ya existe una cita activa con el mismo doctor, fecha y hora.
+    function estaDuplicada(doctor, fecha, hora) {
+      const activas = citas.filter(function (c) { return !c.cancelada; });
+      return activas.some(function (c) {
+        return c.doctor === doctor && c.fecha === fecha && c.hora === hora;
+      });
     }
 
     /**
