@@ -10,7 +10,7 @@
  */
 const test = require('node:test');
 const assert = require('node:assert');
-const { crearGestor } = require('../citas.js');
+const { crearGestor, esHorarioLaboral } = require('../citas.js');
 
 // ---------------------------------------------------------------------------
 // Prueba 1 (HU-1): Agendar una cita médica
@@ -35,4 +35,38 @@ test('Cita Medica: agendar una cita válida devuelve el objeto con id', () => {
   assert.strictEqual(cita.hora, '10:00');
   assert.ok(cita.id > 0, 'La cita debe tener un id positivo');
   assert.strictEqual(cita.cancelada, false);
+});
+
+// ---------------------------------------------------------------------------
+// Prueba 2 (HU-2): Validar horario laboral (08:00 - 18:00)
+// ---------------------------------------------------------------------------
+test('Cita Medica: rechaza una cita fuera del horario laboral', () => {
+  // ARRANGE
+  const gestor = crearGestor();
+  const datos = {
+    paciente: 'Maria Gomez',
+    doctor: 'Dr. Lopez',
+    fecha: '2026-08-20',
+    hora: '22:30'
+  };
+
+  // ACT + ASSERT
+  assert.throws(() => {
+    gestor.agendar(datos);
+  }, /Fuera del horario laboral/);
+});
+
+test('Cita Medica: esHorarioLaboral acepta 08:00 y rechaza 17:59 vs 18:00', () => {
+  // ARRANGE (hora de prueba)
+  // ACT
+  const enLimite = esHorarioLaboral('08:00');
+  const antesDelCierre = esHorarioLaboral('17:59');
+  const alCierre = esHorarioLaboral('18:00');
+  const fueraMadrugada = esHorarioLaboral('02:00');
+
+  // ASSERT
+  assert.strictEqual(enLimite, true);
+  assert.strictEqual(antesDelCierre, true);
+  assert.strictEqual(alCierre, false);
+  assert.strictEqual(fueraMadrugada, false);
 });
