@@ -70,3 +70,27 @@ test('Cita Medica: esHorarioLaboral acepta 08:00 y rechaza 17:59 vs 18:00', () =
   assert.strictEqual(alCierre, false);
   assert.strictEqual(fueraMadrugada, false);
 });
+
+// ---------------------------------------------------------------------------
+// Prueba 3 (HU-3): Evitar citas duplicadas
+// ---------------------------------------------------------------------------
+test('Cita Medica: rechaza una cita duplicada (mismo doctor, fecha y hora)', () => {
+  // ARRANGE
+  const gestor = crearGestor();
+  gestor.agendar({
+    paciente: 'Edgar Paz',
+    doctor: 'Dr. Lopez',
+    fecha: '2026-08-20',
+    hora: '10:00'
+  });
+
+  // ACT + ASSERT
+  assert.throws(() => {
+    gestor.agendar({
+      paciente: 'Otro Paciente',
+      doctor: 'Dr. Lopez',
+      fecha: '2026-08-20',
+      hora: '10:00'
+    });
+  }, /Ya existe una cita/);
+});
