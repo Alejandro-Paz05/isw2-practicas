@@ -35,9 +35,13 @@
 
     /**
      * RF-1: Agenda una cita médica.
+     * RF-2: Valida horario laboral (08:00 - 18:00).
      * @returns {object} La cita creada.
      */
     function agendar({ paciente, doctor, fecha, hora }) {
+      if (!esHorarioLaboral(hora)) {
+        throw new Error('Fuera del horario laboral (08:00 - 18:00)');
+      }
       const cita = {
         id: siguienteId++,
         paciente,
@@ -58,8 +62,22 @@
     }
   }
 
-  function esHorarioLaboral() {
-    return false;
+  /**
+   * RF-2: Verifica si la hora está dentro del horario laboral.
+   * @param {string} hora Formato "HH:MM".
+   * @returns {boolean}
+   */
+  function esHorarioLaboral(hora) {
+    if (typeof hora !== 'string' || !/^\d{2}:\d{2}$/.test(hora)) {
+      return false;
+    }
+    const partes = hora.split(':');
+    const hh = parseInt(partes[0], 10);
+    const mm = parseInt(partes[1], 10);
+    if (mm < 0 || mm > 59) {
+      return false;
+    }
+    return hh >= HORA_INICIO && hh < HORA_FIN;
   }
 
   return {
