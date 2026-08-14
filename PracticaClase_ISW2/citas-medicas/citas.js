@@ -29,6 +29,7 @@
 
     return {
       agendar,
+      cancelar,
       listar,
       _getCitas: () => citas
     };
@@ -64,6 +65,20 @@
       return activas.some(function (c) {
         return c.doctor === doctor && c.fecha === fecha && c.hora === hora;
       });
+    }
+
+    /**
+     * RF-4: Cancela una cita por su id.
+     * @param {number} id
+     * @returns {boolean} true si se canceló, false si no existía.
+     */
+    function cancelar(id) {
+      const cita = citas.find(function (c) { return c.id === id; });
+      if (!cita) {
+        return false;
+      }
+      cita.cancelada = true;
+      return true;
     }
 
     /**
