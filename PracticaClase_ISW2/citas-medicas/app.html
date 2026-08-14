@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citas Médicas</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      padding: 24px 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    header h1 { font-size: 1.6rem; }
+    header p { opacity: .9; margin-top: 4px; font-size: .95rem; }
+    main {
+      max-width: 960px;
+      margin: 32px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 720px) { main { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      border: 1px solid var(--border);
+    }
+    .card h2 { font-size: 1.15rem; margin-bottom: 16px; color: var(--primary-dark); }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: .95rem;
+      background: #fff;
+    }
+    input:focus, select:focus { outline: 2px solid var(--primary); border-color: transparent; }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+      background: var(--primary);
+      transition: background .15s;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-danger {
+      background: var(--danger);
+      padding: 6px 12px;
+      font-size: .8rem;
+      width: auto;
+    }
+    .btn-danger:hover { background: #b91c1c; }
+    .msg {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: .9rem;
+      display: none;
+    }
+    .msg.success { display: block; background: #dcfce7; color: var(--success); border: 1px solid #bbf7d0; }
+    .msg.error { display: block; background: #fee2e2; color: var(--danger); border: 1px solid #fecaca; }
+    .cita-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #f8fafc;
+    }
+    .cita-info strong { display: block; }
+    .cita-info span { color: var(--muted); font-size: .85rem; }
+    .empty { color: var(--muted); text-align: center; padding: 20px; font-style: italic; }
+    .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: var(--primary-dark);
+      font-size: .75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏥 Sistema de Citas Médicas</h1>
+    <p>Aplicación HTML standalone · Lógica probada con TDD (patrón AAA)</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Agendar nueva cita</h2>
+      <form id="formCita">
+        <div class="form-group">
+          <label for="paciente">Paciente</label>
+          <input type="text" id="paciente" placeholder="Nombre del paciente" required>
+        </div>
+        <div class="form-group">
+          <label for="doctor">Doctor</label>
+          <input type="text" id="doctor" placeholder="Nombre del doctor" required>
+        </div>
+        <div class="form-group">
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha" required>
+        </div>
+        <div class="form-group">
+          <label for="hora">Hora (08:00 – 18:00)</label>
+          <input type="time" id="hora" min="08:00" max="18:00" required>
+        </div>
+        <button type="submit" class="btn">Agendar cita</button>
+        <div id="msgForm" class="msg"></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Citas agendadas</h2>
+      <div id="listaCitas"></div>
+    </section>
+  </main>
+
+  <!-- Lógica de negocio compartida (misma que se prueba con TDD) -->
+  <script src="citas.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      const gestor = CitasMedicas.crearGestor();
+
+      const form = document.getElementById('formCita');
+      const msgForm = document.getElementById('msgForm');
+      const listaCitas = document.getElementById('listaCitas');
+
+      function mostrarMensaje(tipo, texto) {
+        msgForm.className = 'msg ' + tipo;
+        msgForm.textContent = texto;
+      }
+
+      function renderizar() {
+        const citas = gestor.listar();
+        if (citas.length === 0) {
+          listaCitas.innerHTML = '<p class="empty">No hay citas agendadas.</p>';
+          return;
+        }
+        listaCitas.innerHTML = '';
+        citas.forEach(function (cita) {
+          const item = document.createElement('div');
+          item.className = 'cita-item';
+          item.innerHTML =
+            '<div class="cita-info">' +
+              '<strong>' + cita.paciente + '</strong>' +
+              '<span>' + cita.doctor + '</span>' +
+              '<div><span class="badge">' + cita.fecha + ' · ' + cita.hora + '</span></div>' +
+            '</div>' +
+            '<button class="btn btn-danger" data-id="' + cita.id + '">Cancelar</button>';
+          listaCitas.appendChild(item);
+        });
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const datos = {
+          paciente: document.getElementById('paciente').value,
+          doctor: document.getElementById('doctor').value,
+          fecha: document.getElementById('fecha').value,
+          hora: document.getElementById('hora').value
+        };
+        try {
+          gestor.agendar(datos);
+          mostrarMensaje('success', 'Cita agendada correctamente.');
+          form.reset();
+          renderizar();
+        } catch (err) {
+          mostrarMensaje('error', err.message);
+        }
+      });
+
+      listaCitas.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-danger');
+        if (!btn) return;
+        gestor.cancelar(Number(btn.dataset.id));
+        renderizar();
+      });
+
+      renderizar();
+    })();
+  </script>
+</body>
+</html>
