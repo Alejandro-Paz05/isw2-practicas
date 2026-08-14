@@ -116,3 +116,31 @@ test('Cita Medica: cancelar una cita la elimina de la lista activa', () => {
   assert.strictEqual(resultado, true);
   assert.strictEqual(activas.length, 0, 'La cita cancelada no debe aparecer');
 });
+
+// ---------------------------------------------------------------------------
+// Prueba 5 (RF-5): Listar citas activas
+// ---------------------------------------------------------------------------
+test('Cita Medica: listar devuelve solo las citas no canceladas', () => {
+  // ARRANGE
+  const gestor = crearGestor();
+  const cita1 = gestor.agendar({
+    paciente: 'Edgar Paz',
+    doctor: 'Dr. Lopez',
+    fecha: '2026-08-20',
+    hora: '10:00'
+  });
+  gestor.agendar({
+    paciente: 'Maria Gomez',
+    doctor: 'Dra. Ruiz',
+    fecha: '2026-08-21',
+    hora: '11:00'
+  });
+
+  // ACT
+  gestor.cancelar(cita1.id);
+  const activas = gestor.listar();
+
+  // ASSERT
+  assert.strictEqual(activas.length, 1);
+  assert.strictEqual(activas[0].paciente, 'Maria Gomez');
+});
