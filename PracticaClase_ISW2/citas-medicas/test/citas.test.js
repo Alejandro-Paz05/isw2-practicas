@@ -94,3 +94,25 @@ test('Cita Medica: rechaza una cita duplicada (mismo doctor, fecha y hora)', () 
     });
   }, /Ya existe una cita/);
 });
+
+// ---------------------------------------------------------------------------
+// Prueba 4 (HU-4): Cancelar una cita
+// ---------------------------------------------------------------------------
+test('Cita Medica: cancelar una cita la elimina de la lista activa', () => {
+  // ARRANGE
+  const gestor = crearGestor();
+  const cita = gestor.agendar({
+    paciente: 'Edgar Paz',
+    doctor: 'Dr. Lopez',
+    fecha: '2026-08-20',
+    hora: '10:00'
+  });
+
+  // ACT
+  const resultado = gestor.cancelar(cita.id);
+  const activas = gestor.listar();
+
+  // ASSERT
+  assert.strictEqual(resultado, true);
+  assert.strictEqual(activas.length, 0, 'La cita cancelada no debe aparecer');
+});
