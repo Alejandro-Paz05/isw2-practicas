@@ -73,3 +73,5 @@ test("efecto secundario actual: procesarVenta muta el carrito agregando .total",
 
 console.log(`\n${pasadas} pasadas, ${fallidas} fallidas`);
 if (fallidas > 0) process.exit(1);
+
+//
